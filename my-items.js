@@ -9,5 +9,5 @@
 // ar:   image height divided by width (600 wide x 300 tall = .5)
 
 window.MY_ITEMS = [
-  // {id:'sticker1', name:'Sticker name', src:'sticker1.png', w:.25, ar:1},
+  {id:'sticker03', name:'Sticker', src:'sticker_03.png', w:.25, ar:1},
 ];
