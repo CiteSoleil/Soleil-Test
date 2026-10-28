@@ -230,7 +230,7 @@ footer button:focus-visible,.sheet button:focus-visible{outline:2px solid var(--
 .mbar[hidden]{display:none}
 #mbPlay{flex:none;background:none;border:0;color:inherit;font:inherit;font-size:20px;line-height:1;min-width:38px;min-height:38px;padding:0;cursor:pointer;-webkit-tap-highlight-color:transparent}
 #mbPlay:focus-visible{outline:2px solid var(--red,#E1251B);outline-offset:2px}
-#mbPlay.pop{animation:mbpop .22s ease-out}
+#mbPlay.mb-bump{animation:mbpop .22s ease-out}
 @keyframes mbpop{0%{transform:scale(.6)}70%{transform:scale(1.2)}100%{transform:scale(1)}}
 .mb-wave{flex:1;min-width:0;overflow:hidden}
 .mb-wave span{display:inline-block;will-change:transform}
@@ -238,7 +238,7 @@ footer button:focus-visible,.sheet button:focus-visible{outline:2px solid var(--
 @keyframes mbwave{to{transform:translateX(-50%)}}
 .mb-tail{flex:none}
 .vid-on .mbar{color:#F9F9F9;text-shadow:0 1px 3px rgba(0,0,0,.6)}
-@media (prefers-reduced-motion:reduce){.mbar.playing .mb-wave span,#mbPlay.pop{animation:none}}
+@media (prefers-reduced-motion:reduce){.mbar.playing .mb-wave span,#mbPlay.mb-bump{animation:none}}
 .side-art{position:absolute;left:clamp(22px,7vw,110px);top:0;bottom:0;margin:0;overflow:hidden;z-index:0;pointer-events:none;user-select:none;-webkit-user-select:none;font-family:ui-monospace,"SF Mono",Menlo,Consolas,"DejaVu Sans Mono",monospace;font-size:clamp(9px,1.5vw,15px);line-height:1.08;letter-spacing:0;color:var(--ink);opacity:.9;white-space:pre}
 .vid-on .side-art{display:none}
 @media (max-width:640px){.side-art{left:26px;font-size:9px}}
@@ -345,7 +345,7 @@ footer button:focus-visible,.sheet button:focus-visible{outline:2px solid var(--
     <span>Drag, tap, or pinch to twist and resize.</span>
     <button id="shuffle" type="button">Shuffle</button>
   </footer>
-  <div class="mbar" id="mbar" hidden><button type="button" id="mbPlay" aria-label="Play music">▶︎</button><span aria-hidden="true">•</span><span class="mb-wave" aria-hidden="true"><span id="mbWave">၊၊||၊|။|||||။၊|။</span></span><span class="mb-tail" aria-hidden="true">•── ⋆⋅☆⋅⋆ ──˖ ݁♬⋆.˚𝄞</span></div>
+  <div class="mbar" id="mbar" hidden><button type="button" id="mbPlay" aria-label="Play music" data-s="play"><svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M5 3l12 7-12 7z"/></svg></button><span aria-hidden="true">•</span><span class="mb-wave" aria-hidden="true"><span id="mbWave">၊၊||၊|။|||||။၊|။</span></span><span class="mb-tail" aria-hidden="true">•── ⋆⋅☆⋅⋆ ──˖ ݁♬⋆.˚𝄞</span></div>
   <div class="marquee rev" aria-label="Join SMS for early access to exclusive drops and giveaways"><div class="track" aria-hidden="true"><span>Join SMS for early access to exclusive drops &amp; giveaways</span><span>Join SMS for early access to exclusive drops &amp; giveaways</span><span>Join SMS for early access to exclusive drops &amp; giveaways</span><span>Join SMS for early access to exclusive drops &amp; giveaways</span><span>Join SMS for early access to exclusive drops &amp; giveaways</span><span>Join SMS for early access to exclusive drops &amp; giveaways</span><span>Join SMS for early access to exclusive drops &amp; giveaways</span><span>Join SMS for early access to exclusive drops &amp; giveaways</span></div></div>
   <div class="b-toast" id="bToast" aria-live="polite"></div>
   <audio id="bgm" src="music.mp3" loop preload="auto"></audio>
@@ -885,14 +885,14 @@ let musicReady=false,musicStarted=false;
 const mbar=document.getElementById('mbar'),mbPlay=document.getElementById('mbPlay'),mbWave=document.getElementById('mbWave');
 mbWave.textContent=mbWave.textContent.repeat(60);
 function syncMusicBtn(){musicBtn.setAttribute('aria-pressed',musicOn);musicBtn.setAttribute('aria-label',musicOn?'Music on. Tap to mute':'Music off. Tap to play');musicBtn.classList.toggle('playing',musicOn&&!bgm.paused);
-  const on=!bgm.paused;const icon=on?'\u23F8\uFE0E':'\u25B6\uFE0E';
-  if(mbPlay.textContent!==icon){mbPlay.textContent=icon;mbPlay.classList.remove('pop');void mbPlay.offsetWidth;mbPlay.classList.add('pop')}
+  const on=!bgm.paused;const st=on?'pause':'play';
+  if(mbPlay.dataset.s!==st){mbPlay.dataset.s=st;mbPlay.innerHTML=on?'<svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><rect x="4" y="3" width="4" height="14"/><rect x="12" y="3" width="4" height="14"/></svg>':'<svg viewBox="0 0 20 20" width="18" height="18" fill="currentColor" aria-hidden="true"><path d="M5 3l12 7-12 7z"/></svg>';mbPlay.classList.remove('mb-bump');void mbPlay.offsetWidth;mbPlay.classList.add('mb-bump')}
   mbPlay.setAttribute('aria-label',on?'Pause music':'Play music');mbar.classList.toggle('playing',on)}
 mbPlay.addEventListener('click',e=>{e.stopPropagation();
   if(bgm.paused){musicOn=true;try{localStorage.setItem('soleil-music','on')}catch(_){}playMusic()}
   else{musicOn=false;try{localStorage.setItem('soleil-music','off')}catch(_){}bgm.pause()}
   syncMusicBtn()});
-function playMusic(){if(!musicReady||!musicOn)return;bgm.volume=.6;const p=bgm.play();if(p&&p.then)p.then(()=>{musicStarted=true;syncMusicBtn()}).catch(()=>{})}
+function playMusic(){if(!musicOn)return;bgm.volume=.6;const p=bgm.play();if(p&&p.then)p.then(()=>{musicStarted=true;musicReady=true;syncMusicBtn()}).catch(()=>{})}
 bgm.addEventListener('canplay',()=>{musicReady=true;mbar.hidden=false;syncMusicBtn()},{once:true});
 bgm.addEventListener('error',()=>{musicBtn.hidden=true;mbar.hidden=true});
 bgm.addEventListener('play',syncMusicBtn);bgm.addEventListener('pause',syncMusicBtn);
