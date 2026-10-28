@@ -226,6 +226,7 @@ footer button:focus-visible,.sheet button:focus-visible{outline:2px solid var(--
 .vid-on footer button{background:rgba(11,11,11,.35);color:#F9F9F9;border-color:rgba(249,249,249,.6)}
 .vid-miss{position:absolute;left:50%;top:14px;transform:translateX(-50%);z-index:2;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:11px;text-transform:uppercase;color:#F9F9F9;background:rgba(11,11,11,.7);padding:6px 10px;display:none;white-space:nowrap}
 .vid-on.vid-err .vid-miss{display:block}
+.vid-on.vid-joined .signup{display:none}
 .music{position:fixed;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 54px);z-index:9300;width:42px;height:42px;border-radius:50%;border:1.5px solid var(--ink);background:var(--bg);color:var(--ink);display:grid;place-items:center;cursor:pointer;padding:0}
 .music[hidden]{display:none}
 .music svg{width:20px;height:20px}
@@ -277,6 +278,7 @@ footer button:focus-visible,.sheet button:focus-visible{outline:2px solid var(--
       <form id="lockForm" novalidate><label for="code" class="sr" style="position:absolute;left:-9999px">Access code</label><input id="code" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code"><button type="submit">Unlock</button></form>
       <p class="err" id="lockErr" aria-live="polite"></p>
       <button type="button" class="alt" id="lockSms">No code? Join SMS for early access</button>
+      <a class="alt" href="https://instagram.com/soleilsportswear" target="_blank" rel="noopener" style="display:block;margin:14px auto 0;width:max-content">Follow @soleilsportswear</a>
     </div>
   </section>
   <section class="page" id="pg-booth" hidden aria-labelledby="bTitle">
@@ -523,7 +525,7 @@ const TEXT={
  media:'<header class="ptitle rule"><h1>Media</h1><p>Video, photo and press</p></header><div class="cards">'+['Video','Photo','Press','Event recap'].map(n=>'<div class="card"><span>'+n+'</span><span>Coming soon</span></div>').join('')+'</div>',
  more:'<header class="ptitle rule"><h1>More</h1><p>Every page in one place</p></header><nav class="links" aria-label="All pages">'+
    [['home','Home'],['mens','Mens'],['womens','Womens'],['accessories','Accessories'],['campaigns','Campaigns'],['media','Media'],['random','Random'],['about','About'],['faq','FAQ'],['cart','Cart']].map(l=>'<a href="#'+l[0]+'">'+l[1]+'</a>').join('')+
-   '<a href="#shipping">Shipping</a><a href="#refunds">Refunds</a><a href="#terms">Terms</a><a href="#privacy">Privacy</a><a class="off" aria-disabled="true">Instagram</a></nav>'
+   '<a href="#shipping">Shipping</a><a href="#refunds">Refunds</a><a href="#terms">Terms</a><a href="#privacy">Privacy</a><a href="https://instagram.com/soleilsportswear" target="_blank" rel="noopener">Instagram</a></nav>'
 };
 
 const BIZ=F('LEGAL BUSINESS NAME'),EMAIL=F('CONTACT EMAIL'),ADDR=F('MAILING ADDRESS');
@@ -796,7 +798,7 @@ function buildBooth(){
   (function loop(){if(!pgBooth.hidden){controls.update();renderer.render(scene,camera)}requestAnimationFrame(loop)})();
   return {resize};
 }
-let randomHits=0,randomTarget=2+Math.floor(Math.random()*3);
+let randomHits=0,randomTarget=1+Math.floor(Math.random()*2),lastSpecial=null;
 function boothToast(){const el=document.getElementById('bToast');el.textContent='You found the booth';el.classList.add('on');setTimeout(()=>el.classList.remove('on'),2200)}
 
 /* ---------- Early access lock ---------- */
@@ -846,6 +848,11 @@ musicBtn.addEventListener('click',e=>{e.stopPropagation();musicOn=!musicOn;try{l
 bgm.load();
 
 /* ---------- Video page ---------- */
+signup.addEventListener('submit',()=>{
+  if(!appEl.classList.contains('vid-on'))return;
+  const v=document.getElementById('phone').value.replace(/\D/g,'');if(v.length<10)return;
+  setTimeout(()=>{appEl.classList.add('vid-joined');const el=document.getElementById('bToast');el.textContent='You\u2019re in. Enjoy the video';el.classList.add('on');setTimeout(()=>el.classList.remove('on'),2200)},900);
+});
 const bgv=document.getElementById('bgv');let vidLoaded=false;
 bgv.addEventListener('error',()=>appEl.classList.add('vid-err'));
 function showVideo(on){
@@ -856,8 +863,10 @@ function showVideo(on){
 /* router */
 function route(){
   let r=(location.hash.slice(1)||'home').toLowerCase();
-  if(r==='random'){randomHits++;if(randomHits>=randomTarget){randomHits=0;randomTarget=2+Math.floor(Math.random()*3);location.replace('#booth');if(unlocked)boothToast();return}
-    const pool=ROUTES.filter(x=>x!==lastRoute&&x!=='booth');location.replace('#'+pool[Math.floor(Math.random()*pool.length)]);return}
+  if(r==='random'){randomHits++;if(randomHits>=randomTarget){randomHits=0;randomTarget=1+Math.floor(Math.random()*2);
+      const sp=lastSpecial?(lastSpecial==='booth'?'video':'booth'):(Math.random()<.5?'booth':'video');lastSpecial=sp;
+      location.replace('#'+sp);if(sp==='booth'&&unlocked)boothToast();return}
+    const pool=ROUTES.filter(x=>x!==lastRoute&&x!=='booth'&&x!=='video');location.replace('#'+pool[Math.floor(Math.random()*pool.length)]);return}
   if(!ROUTES.includes(r))r='home';
   const home=r==='home'||r==='video';
   document.documentElement.classList.toggle('is-home',home);
