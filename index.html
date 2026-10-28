@@ -183,6 +183,34 @@ footer button:focus-visible,.sheet button:focus-visible{outline:2px solid var(--
 .b-dims{padding:6px var(--pad) 28px;font-size:.72rem;color:var(--muted);text-transform:none;line-height:1.6;margin:0;max-width:70ch}
 .b-toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 56px);transform:translate(-50%,-20px);background:var(--red);color:#fff;font-family:"IBM Plex Mono",ui-monospace,monospace;font-size:.8rem;text-transform:uppercase;padding:10px 16px;z-index:9600;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s}
 .b-toast.on{opacity:1;transform:translate(-50%,0)}
+
+/* ---------- Lock + SMS popup ---------- */
+#pg-lock{display:flex;align-items:center;justify-content:center}
+#pg-lock[hidden]{display:none!important}
+.lock{width:min(360px,100%);padding:28px var(--pad);text-align:center}
+.lock svg{width:64px;height:64px;color:var(--red);margin-bottom:14px}
+.lock h1{font-weight:400;font-size:2.4rem;letter-spacing:-.02em;margin:0 0 6px}
+.lock .sub{font-size:.78rem;color:var(--muted);margin:0 0 20px}
+.lock form{display:flex;gap:6px}
+.lock input,.pop input{flex:1;min-width:0;font:inherit;font-size:16px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink);background:transparent;border:var(--rule) solid var(--ink);border-radius:0;padding:12px}
+.lock input:focus,.pop input:focus{outline:2px solid var(--red);outline-offset:1px}
+.lock form button,.pop form button{background:var(--ink)!important;color:var(--bg)!important;padding:0 18px!important;font-weight:500}
+.lock .err{min-height:1.4em;font-size:.72rem;color:var(--red);margin:10px 0 0}
+.lock form.shake{animation:shake .24s steps(4)}
+.lock .alt{margin-top:18px;font-size:.75rem;text-decoration:underline;text-underline-offset:3px;color:var(--ink)}
+.pop-scrim{position:fixed;inset:0;background:rgba(11,11,11,.45);z-index:9700;opacity:0;pointer-events:none;transition:opacity .2s}
+.pop{position:fixed;left:50%;top:50%;z-index:9701;width:min(360px,calc(100% - 32px));transform:translate(-50%,-46%);opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;background:var(--bg);border:var(--rule) solid var(--ink);padding:22px 18px 18px;font-family:"IBM Plex Mono",ui-monospace,monospace;text-transform:uppercase;--rule:1.5px}
+.pop-on .pop-scrim{opacity:1;pointer-events:auto}
+.pop-on .pop{opacity:1;pointer-events:auto;transform:translate(-50%,-50%)}
+.pop .x{position:absolute;top:8px;right:8px;width:36px;height:36px;font-size:1.2rem;background:none;border:0;color:var(--ink);cursor:pointer}
+.pop h2{font-weight:400;font-size:1.6rem;letter-spacing:-.02em;margin:0 0 6px;color:var(--red)}
+.pop p.lead{font-size:.78rem;margin:0 0 16px;line-height:1.5}
+.pop form{display:flex;gap:6px}
+.pop input{text-transform:none;letter-spacing:0}
+.pop button{font:inherit;text-transform:inherit;cursor:pointer;border:0}
+.pop .fine{font-size:.62rem;text-transform:none;color:var(--muted);line-height:1.45;margin:10px 0 0}
+.pop .fine a{color:inherit}
+@media (prefers-reduced-motion:reduce){.pop,.pop-scrim{transition:none}}
 </style>
 </head>
 <body>
@@ -214,6 +242,16 @@ footer button:focus-visible,.sheet button:focus-visible{outline:2px solid var(--
     <p class="note">Demo only. Items, prices and sounds are placeholders. The cart count carries across pages.</p>
   </section>
   <section class="page" id="pg-text" hidden></section>
+  <section class="page" id="pg-lock" hidden aria-labelledby="lockTitle">
+    <div class="lock">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="square" aria-hidden="true"><rect x="4" y="10.5" width="16" height="11"/><path d="M8 10.5V7a4 4 0 0 1 8 0v3.5"/><path d="M12 15v2.5"/></svg>
+      <h1 id="lockTitle">Locked</h1>
+      <p class="sub">Early access only. Enter your code to get in.</p>
+      <form id="lockForm" novalidate><label for="code" class="sr" style="position:absolute;left:-9999px">Access code</label><input id="code" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Code"><button type="submit">Unlock</button></form>
+      <p class="err" id="lockErr" aria-live="polite"></p>
+      <button type="button" class="alt" id="lockSms">No code? Join SMS for early access</button>
+    </div>
+  </section>
   <section class="page" id="pg-booth" hidden aria-labelledby="bTitle">
     <header class="b-head"><span class="b-found">Secret page</span><h1 id="bTitle">Cite Soleil booth</h1><p>20 x 20 x 15 ft inflatable. Drag to spin, pinch or scroll to zoom.</p></header>
     <div id="boothStage"><div class="b-load" id="bLoad">Loading booth</div>
@@ -237,6 +275,15 @@ footer button:focus-visible,.sheet button:focus-visible{outline:2px solid var(--
   </footer>
   <div class="marquee rev" aria-label="Join SMS for early access to exclusive drops and giveaways"><div class="track" aria-hidden="true"><span>Join SMS for early access to exclusive drops &amp; giveaways</span><span>Join SMS for early access to exclusive drops &amp; giveaways</span><span>Join SMS for early access to exclusive drops &amp; giveaways</span><span>Join SMS for early access to exclusive drops &amp; giveaways</span><span>Join SMS for early access to exclusive drops &amp; giveaways</span><span>Join SMS for early access to exclusive drops &amp; giveaways</span><span>Join SMS for early access to exclusive drops &amp; giveaways</span><span>Join SMS for early access to exclusive drops &amp; giveaways</span></div></div>
   <div class="b-toast" id="bToast" aria-live="polite"></div>
+  <div class="pop-scrim" id="popScrim"></div>
+  <div class="pop" id="pop" role="dialog" aria-modal="true" aria-labelledby="popTitle" aria-hidden="true">
+    <button type="button" class="x" id="popClose" aria-label="Close">&#x2715;</button>
+    <h2 id="popTitle">Get early access</h2>
+    <p class="lead">Join SMS for early access to exclusive drops &amp; giveaways.</p>
+    <form id="popForm" novalidate><input id="popPhone" type="tel" inputmode="tel" autocomplete="tel" placeholder="(281) 330-8004" aria-label="Phone number"><button type="submit">Join</button></form>
+    <p class="fine" id="popFine">Demo only. By joining you agree to get recurring automated marketing texts. Msg &amp; data rates may apply. Reply STOP to opt out. <a href="#terms">Terms</a> &amp; <a href="#privacy">Privacy</a>.</p>
+  </div>
+
   <div class="scrim" id="scrim"></div>
   <div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" aria-hidden="true">
     <div class="grab"></div>
@@ -707,15 +754,54 @@ function buildBooth(){
 }
 let randomHits=0,randomTarget=2+Math.floor(Math.random()*3);
 function boothToast(){const el=document.getElementById('bToast');el.textContent='You found the booth';el.classList.add('on');setTimeout(()=>el.classList.remove('on'),2200)}
+
+/* ---------- Early access lock ---------- */
+const CODE_HASH='c598a6e2835e5ce64f29fd9395b3848cb70b707790b482bdb2ea5a41bfca8892';
+const OPEN_ROUTES=['home','terms','privacy'];
+const pgLock=document.getElementById('pg-lock');
+let unlocked=false;try{unlocked=localStorage.getItem('soleil-access')==='1'}catch(_){}
+async function sha(s){
+  if(window.crypto&&crypto.subtle){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
+  return s==='SOLEIL'?CODE_HASH:'';
+}
+const appEl=document.getElementById('app'),popEl=document.getElementById('pop');
+let popOpener=null;
+function openPop(){popOpener=document.activeElement;appEl.classList.add('pop-on');popEl.setAttribute('aria-hidden','false');setTimeout(()=>document.getElementById('popPhone').focus({preventScroll:true}),60)}
+function closePop(){if(!appEl.classList.contains('pop-on'))return;appEl.classList.remove('pop-on');popEl.setAttribute('aria-hidden','true');
+  const c=document.getElementById('code');if(!pgLock.hidden&&c)c.focus({preventScroll:true});else if(popOpener&&popOpener.focus)popOpener.focus({preventScroll:true})}
+document.getElementById('popClose').onclick=closePop;
+document.getElementById('popScrim').onclick=closePop;
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closePop()});
+popEl.addEventListener('click',e=>{if(e.target.closest('a'))closePop()});
+document.getElementById('popForm').addEventListener('submit',e=>{e.preventDefault();
+  const v=document.getElementById('popPhone').value.replace(/\D/g,'');
+  document.getElementById('popFine').textContent=v.length>=10?'Demo only. Nothing was sent, but this is where the confirmation text would go out.':'Enter a 10 digit number to see how it works.';
+  if(v.length>=10)SFX.add();else SFX.deny()});
+document.getElementById('lockSms').onclick=openPop;
+document.getElementById('lockForm').addEventListener('submit',async e=>{
+  e.preventDefault();const f=e.currentTarget,inp=document.getElementById('code'),err=document.getElementById('lockErr');
+  const h=await sha(inp.value.trim().toUpperCase());
+  if(h===CODE_HASH){unlocked=true;try{localStorage.setItem('soleil-access','1')}catch(_){}
+    inp.value='';err.textContent='';SFX.add();lastRoute=null;route();
+    const el=document.getElementById('bToast');el.textContent='Unlocked';el.classList.add('on');setTimeout(()=>el.classList.remove('on'),1800);
+  }else{err.textContent='That code didn\u2019t work.';SFX.deny();f.classList.remove('shake');void f.offsetWidth;f.classList.add('shake');inp.select()}
+});
 /* router */
 function route(){
   let r=(location.hash.slice(1)||'home').toLowerCase();
-  if(r==='random'){randomHits++;if(randomHits>=randomTarget){randomHits=0;randomTarget=2+Math.floor(Math.random()*3);location.replace('#booth');boothToast();return}
+  if(r==='random'){randomHits++;if(randomHits>=randomTarget){randomHits=0;randomTarget=2+Math.floor(Math.random()*3);location.replace('#booth');if(unlocked)boothToast();return}
     const pool=ROUTES.filter(x=>x!==lastRoute&&x!=='booth');location.replace('#'+pool[Math.floor(Math.random()*pool.length)]);return}
   if(!ROUTES.includes(r))r='home';
   const home=r==='home';
   document.documentElement.classList.toggle('is-home',home);
   stage.hidden=!home;foot.hidden=!home;
+  const locked=!unlocked&&!OPEN_ROUTES.includes(r);
+  pgLock.hidden=!locked;
+  if(locked){stage.hidden=true;foot.hidden=true;pgShop.hidden=true;pgText.hidden=true;pgBooth.hidden=true;
+    document.documentElement.classList.remove('is-home');document.getElementById('lockErr').textContent='';
+    closePop();setTimeout(openPop,350);
+    if(lastRoute!==null&&lastRoute!==r)SFX.nav();lastRoute=r;document.title='Locked | soleilsportswear';return}
+  closePop();
   pgShop.hidden=!SHOP[r];pgText.hidden=!TEXT[r];pgBooth.hidden=r!=='booth';
   if(r==='booth'){pgBooth.scrollTop=0;requestAnimationFrame(initBooth)}
   if(home&&!scattered){scattered=true;requestAnimationFrame(scatter)}
